@@ -151,7 +151,7 @@ bool GLRenderManager::ThreadFrame() {
             	std::lock_guard<std::mutex> lk(syncMutex_);
             	syncDone_ = true;
         	}
-        	syncCondVar_.notify_one();
+        	syncCondVar_.notify_all();
         	break;
     	}
 
