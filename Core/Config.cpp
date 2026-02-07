@@ -212,18 +212,18 @@ static float DefaultUISaturation() {
 
 static int DefaultUIScaleFactor() {
 #if PPSSPP_PLATFORM(WINDOWS) || PPSSPP_PLATFORM(LINUX) || PPSSPP_PLATFORM(MAC)
-	return -1;
+	return 0;
 #else
 	return 0;
 #endif
 }
 
 static int DefaultScreenRotation() {
-#if PPSSPP_PLATFORM(ANDROID)
+//#if PPSSPP_PLATFORM(ANDROID)
 	return ROTATION_LOCKED_HORIZONTAL;
-#else
-	return ROTATION_AUTO;
-#endif
+//#else
+//	return ROTATION_AUTO;
+//#endif
 }
 
 #define SETTING(a, x) &a, &a.x
@@ -324,14 +324,14 @@ static const ConfigSetting generalSettings[] = {
 	ConfigSetting("PauseOnLostFocus", SETTING(g_Config, bPauseOnLostFocus), false, CfgFlag::PER_GAME),
 #endif
 
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 	ConfigSetting("WindowX", SETTING(g_Config, iWindowX), -1, CfgFlag::DEFAULT), // -1 tells us to center the window.
 	ConfigSetting("WindowY", SETTING(g_Config, iWindowY), -1, CfgFlag::DEFAULT),
 	ConfigSetting("WindowWidth", SETTING(g_Config, iWindowWidth), 0, CfgFlag::DEFAULT),   // 0 will be automatically reset later (need to do the AdjustWindowRect dance).
 	ConfigSetting("WindowHeight", SETTING(g_Config, iWindowHeight), 0, CfgFlag::DEFAULT),
 	ConfigSetting("WindowSizeState", SETTING(g_Config, iWindowSizeState), (int)WindowSizeState::Normal, CfgFlag::DEFAULT),
 	ConfigSetting("ShrinkIfWindowSmall", SETTING(g_Config, bShrinkIfWindowSmall), false, CfgFlag::DEFAULT),
-#endif
+//#endif
 
 	ConfigSetting("PauseWhenMinimized", SETTING(g_Config, bPauseWhenMinimized), false, CfgFlag::PER_GAME),
 	ConfigSetting("PauseExitsEmulator", SETTING(g_Config, bPauseExitsEmulator), false, CfgFlag::DONT_SAVE),
@@ -503,7 +503,7 @@ static int DefaultGPUBackend() {
 #elif PPSSPP_PLATFORM(MAC)
 
 #if PPSSPP_ARCH(ARM64)
-	return (int)GPUBackend::VULKAN;
+	return (int)GPUBackend::OPENGL;
 #else
 	// On Intel (generally older Macs) default to OpenGL.
 	return (int)GPUBackend::OPENGL;
@@ -741,8 +741,8 @@ static const ConfigSetting graphicsSettings[] = {
 	ConfigSetting("VertexDecJit", SETTING(g_Config, bVertexDecoderJit), &DefaultCodeGen, CfgFlag::DONT_SAVE | CfgFlag::REPORT),
 
 #ifndef MOBILE_DEVICE
-	ConfigSetting("FullScreen", SETTING(g_Config, bFullScreen), false, CfgFlag::DEFAULT),
-	ConfigSetting("FullScreenMulti", SETTING(g_Config, bFullScreenMulti), false, CfgFlag::DEFAULT),
+    	//ConfigSetting("FullScreen", SETTING(g_Config, bFullScreen), true, CfgFlag::DEFAULT),
+	//ConfigSetting("FullScreenMulti", SETTING(g_Config, bFullScreenMulti), false, CfgFlag::DEFAULT),
 #endif
 
 #if PPSSPP_PLATFORM(IOS)
@@ -850,11 +850,11 @@ static bool DefaultShowTouchControls() {
 	case DEVICE_TYPE_MOBILE:
 		return !KeyMap::HasBuiltinController(System_GetProperty(SYSPROP_NAME));
 	default:
-		return false;
+		return true;
 	}
 }
 
-static const float defaultControlScale = 1.15f;
+static const float defaultControlScale = 2.05f;
 static const ConfigTouchPos defaultTouchPosShow = { -1.0f, -1.0f, defaultControlScale, true };
 static const ConfigTouchPos defaultTouchPosHide = { -1.0f, -1.0f, defaultControlScale, false };
 
@@ -882,8 +882,8 @@ void TouchControlConfig::ResetLayout() {
 	for (int i = 0; i < CUSTOM_BUTTON_COUNT; i++) {
 		reset(&touchCustom[i]);
 	}
-	fLeftStickHeadScale = 1.0f;
-	fRightStickHeadScale = 1.0f;
+	fLeftStickHeadScale = 1.5f;
+	fRightStickHeadScale = 1.5f;
 }
 
 bool TouchControlConfig::ResetToDefault(std::string_view blockName) {
@@ -892,6 +892,7 @@ bool TouchControlConfig::ResetToDefault(std::string_view blockName) {
 
 	switch (System_GetPropertyInt(SYSPROP_DEVICE_TYPE)) {
 	case DEVICE_TYPE_MOBILE:
+	    	touchPauseKey.show = true;
 	case DEVICE_TYPE_DESKTOP:
 		touchPauseKey.show = true;
 		break;
@@ -900,7 +901,6 @@ bool TouchControlConfig::ResetToDefault(std::string_view blockName) {
 		touchPauseKey.show = false;
 		break;
 	}
-
 	return true;
 }
 

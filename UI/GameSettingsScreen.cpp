@@ -412,7 +412,7 @@ void GameSettingsScreen::CreateGraphicsSettings(UI::ViewGroup *graphicsSettings)
 	graphicsSettings->Add(new ItemHeader(gr->T("Display")));
 
 	if (deviceType != DEVICE_TYPE_VR) {
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 		CheckBox *fullscreenCheckbox = graphicsSettings->Add(new CheckBox(&g_Config.bFullScreen, gr->T("FullScreen", "Full Screen")));
 		fullscreenCheckbox->OnClick.Add([](UI::EventParams &e) {
 			System_ApplyFullscreenState();
@@ -426,7 +426,7 @@ void GameSettingsScreen::CreateGraphicsSettings(UI::ViewGroup *graphicsSettings)
 				System_ApplyFullscreenState();
 			});
 		}
-#endif
+//#endif
 
 #if PPSSPP_PLATFORM(ANDROID)
 		// Hide Immersive Mode on pre-kitkat Android

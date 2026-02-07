@@ -334,9 +334,9 @@ namespace CustomKeyData {
 		{ ImageID::invalid(), VIRTKEY_SAVE_STATE },
 		{ ImageID::invalid(), VIRTKEY_LOAD_STATE },
 		{ ImageID::invalid(), VIRTKEY_NEXT_SLOT },
-#if !defined(MOBILE_DEVICE)  // BAD!!
+//#if !defined(MOBILE_DEVICE)  // BAD!!
 		{ ImageID::invalid(), VIRTKEY_TOGGLE_FULLSCREEN },
-#endif
+//#endif
 		{ ImageID::invalid(), VIRTKEY_SPEED_CUSTOM1 },
 		{ ImageID::invalid(), VIRTKEY_SPEED_CUSTOM2 },
 		{ ImageID::invalid(), VIRTKEY_TEXTURE_DUMP },

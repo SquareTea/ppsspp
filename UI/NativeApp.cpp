@@ -1369,7 +1369,7 @@ bool NativeKey(const KeyInput &key) {
 #endif
 
 	// INFO_LOG(Log::System, "Key code: %i flags: %i", key.keyCode, key.flags);
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 	if (g_Config.bPauseExitsEmulator) {
 		std::vector<int> pspKeys;
 		pspKeys.clear();
@@ -1380,7 +1380,7 @@ bool NativeKey(const KeyInput &key) {
 			}
 		}
 	}
-#endif
+//#endif
 
 #ifdef _DEBUG
 	// Debug hack: Randomize the language with F9!

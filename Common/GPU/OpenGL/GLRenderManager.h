@@ -201,6 +201,7 @@ enum class GLRRunType {
 	SUBMIT,
 	PRESENT,
 	SYNC,
+	EXIT,
 };
 
 class GLRenderManager;
@@ -238,7 +239,7 @@ public:
 
 	void ThreadStart(Draw::DrawContext *draw);
 	void ThreadEnd();
-	bool ThreadFrame(bool waitIfEmpty);  // Returns true if it did anything. False means the queue was empty.
+	bool ThreadFrame();  // Returns true if it did anything. False means the queue was empty.
 
 	void SetErrorCallback(ErrorCallbackFn callback, void *userdata) {
 		queueRunner_.SetErrorCallback(callback, userdata);
@@ -825,7 +826,7 @@ public:
 	}
 
 	void StartThread();  // Currently only used on iOS, since we fully recreate the context on Android
-
+	void StopThread();
 	bool SawOutOfMemory() {
 		return queueRunner_.SawOutOfMemory();
 	}

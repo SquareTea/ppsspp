@@ -34,7 +34,7 @@
 #include "Core/ControlMapper.h"
 #include "UI/GamepadEmu.h"
 
-const float TOUCH_SCALE_FACTOR = 1.5f;
+const float TOUCH_SCALE_FACTOR = 2.0f;
 
 static uint32_t usedPointerMask = 0;
 static uint32_t analogPointerMask = 0;
@@ -111,7 +111,7 @@ bool MultiTouchButton::CanGlide() const {
 }
 
 bool MultiTouchButton::Touch(const TouchInput &input) {
-	_dbg_assert_(input.id >= 0 && input.id < TOUCH_MAX_POINTERS);
+	//_dbg_assert_(input.id >= 0 && input.id < TOUCH_MAX_POINTERS);
 
 	bool retval = GamepadComponent::Touch(input);
 	if ((input.flags & TouchInputFlags::DOWN) && bounds_.Contains(input.x, input.y)) {
@@ -121,21 +121,11 @@ bool MultiTouchButton::Touch(const TouchInput &input) {
 			primaryButton[input.id] = this;
 	}
 	if (input.flags & TouchInputFlags::MOVE) {
-		if (!(input.flags & TouchInputFlags::MOUSE) || input.buttons) {
-			if (bounds_.Contains(input.x, input.y) && !(analogPointerMask & (1 << input.id))) {
-				if (CanGlide() && !primaryButton[input.id]) {
-					primaryButton[input.id] = this;
-				}
-				pointerDownMask_ |= 1 << input.id;
-			} else if (primaryButton[input.id] != this) {
-				pointerDownMask_ &= ~(1 << input.id);
-			}
-		}
+		pointerDownMask_ &= ~(1 << input.id);
 	}
 	if (input.flags & TouchInputFlags::UP) {
 		pointerDownMask_ &= ~(1 << input.id);
 		usedPointerMask &= ~(1 << input.id);
-		primaryButton[input.id] = nullptr;
 	}
 	if (input.flags & TouchInputFlags::RELEASE_ALL) {
 		pointerDownMask_ = 0;

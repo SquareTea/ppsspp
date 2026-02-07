@@ -861,7 +861,7 @@ static void EmuThreadFunc(GraphicsContext *graphicsContext) {
 		NativeFrame(graphicsContext);
 	}
 	emuThreadState = (int)EmuThreadState::STOPPED;
-
+	graphicsContext->StopThread();
 	NativeShutdownGraphics();
 }
 
@@ -939,7 +939,7 @@ static void ProcessSDLEvent(SDL_Window *window, const SDL_Event &event, InputSta
 		g_QuitRequested = 1;
 		break;
 
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 	case SDL_WINDOWEVENT:
 		switch (event.window.event) {
 		case SDL_WINDOWEVENT_SIZE_CHANGED:  // better than RESIZED, more general
@@ -1005,7 +1005,7 @@ static void ProcessSDLEvent(SDL_Window *window, const SDL_Event &event, InputSta
 			break;
 		}
 		break;
-#endif
+//#endif
 	case SDL_KEYDOWN:
 		{
 			if (event.key.repeat > 0) { break;}
@@ -1333,7 +1333,7 @@ void UpdateTextFocus() {
 }
 
 void UpdateSDLCursor() {
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 	if (lastUIState != GetUIState()) {
 		lastUIState = GetUIState();
 		if (lastUIState == UISTATE_INGAME && g_Config.bFullScreen && !g_Config.bShowTouchControls)
@@ -1341,7 +1341,7 @@ void UpdateSDLCursor() {
 		if (lastUIState != UISTATE_INGAME || !g_Config.bFullScreen)
 			SDL_ShowCursor(SDL_ENABLE);
 	}
-#endif
+//#endif
 }
 
 static int printUsage(const char *progname)
@@ -1562,13 +1562,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	// If we're on mobile, don't try for windowed either.
-#if defined(MOBILE_DEVICE) && !PPSSPP_PLATFORM(SWITCH)
-	mode |= SDL_WINDOW_FULLSCREEN;
-#elif defined(USING_FBDEV) || PPSSPP_PLATFORM(SWITCH)
-	mode |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-#else
+//#if defined(MOBILE_DEVICE) && !PPSSPP_PLATFORM(SWITCH)
+//	mode |= SDL_WINDOW_FULLSCREEN;
+//#elif defined(USING_FBDEV) || PPSSPP_PLATFORM(SWITCH)
+//	mode |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+//#else
 	mode |= SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-#endif
+//#endif
 
 	if (mode & SDL_WINDOW_FULLSCREEN_DESKTOP) {
 		g_display.pixel_xres = g_DesktopWidth;
@@ -1833,7 +1833,7 @@ int main(int argc, char *argv[]) {
 
 		bool renderThreadPaused = Native_IsWindowHidden() && g_Config.bPauseWhenMinimized && emuThreadState != (int)EmuThreadState::DISABLED;
 		if (emuThreadState != (int)EmuThreadState::DISABLED && !renderThreadPaused) {
-			if (!graphicsContext->ThreadFrame(true))
+			if (!graphicsContext->ThreadFrame())
 				break;
 		}
 
@@ -1848,9 +1848,10 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "rebooting emu thread");
 			g_rebootEmuThread = false;
 			EmuThreadStop("shutdown");
-			graphicsContext->ThreadFrameUntilCondition([]() {
-				return emuThreadState == (int)EmuThreadState::STOPPED || emuThreadState == (int)EmuThreadState::DISABLED;
-			});
+			// Skipping GL calls, the old context is gone.	
+			while (graphicsContext->ThreadFrame()) {
+				INFO_LOG(Log::System, "graphicsContext->ThreadFrame executed to clear buffers");
+			}
 			EmuThreadJoin();
 			graphicsContext->ThreadEnd();
 			graphicsContext->ShutdownFromRenderThread();
@@ -1877,9 +1878,10 @@ int main(int argc, char *argv[]) {
 	EmuThreadStop("shutdown");
 
 	if (waitOnExit) {
-		graphicsContext->ThreadFrameUntilCondition([]() {
-			return emuThreadState == (int)EmuThreadState::STOPPED || emuThreadState == (int)EmuThreadState::DISABLED;
-		});
+		while (graphicsContext->ThreadFrame()) {
+			// Need to keep eating frames to allow the EmuThread to exit correctly.
+			continue;
+		}
 	}
 
 	EmuThreadJoin();

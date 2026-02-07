@@ -767,7 +767,6 @@ void GameBrowser::Update() {
 
 void GameBrowser::Draw(UIContext &dc) {
 	using namespace UI;
-
 	if (lastScale_ != g_Config.fGameGridScale || lastLayoutWasGrid_ != *gridStyle_) {
 		Refresh();
 	}
@@ -1323,7 +1322,6 @@ void MainScreen::CreateViews() {
 	// Back button to the bottom left.
 	// Scrolling action menu to the right.
 	using namespace UI;
-
 	const bool vertical = GetDeviceOrientation() == DeviceOrientation::Portrait;
 
 	auto mm = GetI18NCategory(I18NCat::MAINMENU);
@@ -1433,7 +1431,7 @@ void MainScreen::CreateViews() {
 		LinearLayout *rightColumnItems = new LinearLayout(ORIENT_VERTICAL, new LinearLayoutParams(FILL_PARENT, WRAP_CONTENT));
 		rightColumnItems->SetSpacing(0.0f);
 		ViewGroup *logo = new LogoView(false, new LinearLayoutParams(FILL_PARENT, 80.0f));
-#if !defined(MOBILE_DEVICE)
+//#if !defined(MOBILE_DEVICE)
 		auto gr = GetI18NCategory(I18NCat::GRAPHICS);
 		ImageID icon(g_Config.bFullScreen ? "I_RESTORE" : "I_FULLSCREEN");
 		fullscreenButton_ = logo->Add(new Button(gr->T("FullScreen", "Full Screen"), icon, new AnchorLayoutParams(48, 48, NONE, 0, 0, NONE, Centering::None)));
@@ -1445,7 +1443,7 @@ void MainScreen::CreateViews() {
 			g_Config.bFullScreen = !g_Config.bFullScreen;
 			System_ApplyFullscreenState();
 		});
-#endif
+//#endif
 		rightColumnItems->Add(logo);
 
 		LinearLayout *rightColumnChoices = rightColumnItems;
