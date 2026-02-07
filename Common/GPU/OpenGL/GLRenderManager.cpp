@@ -133,36 +133,34 @@ bool GLRenderManager::ThreadFrame() {
 
 	// In case of syncs or other partial completion, we keep going until we complete a frame.
 	while (true) {
-		// Pop a task off the queue and execute it. Exiting this loop is done with a special EXIT task,
-		// to keep things uniform.
-		{
-			std::unique_lock<std::mutex> lock(pushMutex_);
-			pushCondVar_.wait(lock, [this] { return !renderThreadQueue_.empty(); });
-			task = renderThreadQueue_.front();
-			renderThreadQueue_.pop();
-		}
+    	std::unique_lock<std::mutex> lock(pushMutex_);
+    	pushCondVar_.wait(lock, [this] {
+        	return !renderThreadQueue_.empty() || !runCompileThread_;
+    	});
 
-		// We got a task! We can now have pushMutex_ unlocked, allowing the host to
-		// push more work when it feels like it, and just start working.
-		if (task->runType == GLRRunType::EXIT) {
-			delete task;
-			// Oh, host wanted out. Let's leave, and also let's notify the host.
-			// This is unlike Vulkan too which can just block on the thread existing.
-			std::unique_lock<std::mutex> lock(syncMutex_);
-			syncCondVar_.notify_one();
-			syncDone_ = true;
-			break;
-		}
+    	if (!runCompileThread_ && renderThreadQueue_.empty())
+        	return false;
 
-		// Render the scene.
-		VLOG("  PULL: Frame %d RUN (%0.3f)", task->frame, time_now_d());
-		if (Run(*task)) {
-			// Swap requested, so we just bail the loop.
-			delete task;
-			break;
-		}
-		delete task;
-	};
+    	task = renderThreadQueue_.front();
+    	renderThreadQueue_.pop();
+    	lock.unlock();
+
+    	if (task->runType == GLRRunType::EXIT) {
+        	delete task;
+        	{
+            	std::lock_guard<std::mutex> lk(syncMutex_);
+            	syncDone_ = true;
+        	}
+        	syncCondVar_.notify_one();
+        	break;
+    	}
+
+    	if (Run(*task)) {
+        	delete task;
+        	break;
+    	}
+    	delete task;
+	}
 
 	return true;
 }
